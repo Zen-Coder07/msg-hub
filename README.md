@@ -41,3 +41,22 @@
 - Task、阶段项目和最终面试均保留评分记录；项目记录测试现象，问答记录每题分数，编程记录题目编号、难度、换题情况及评测结果。
 - 面试将由至少两名评审参与，各评审按统一细则独立评分后，对存在争议的条目依据演示或答题记录复核，形成一份确认后的分项成绩。
 - 成绩反馈包含9项Task分数及平均分、阶段项目结论、项目分、Java基础分、力扣分、两部分折算分和最终总成绩。
+
+# 整体步骤&流程
+1. OnlineUserManager.java（server 包）
+先写在线用户集合 + 加锁的 addUser / removeUser / broadcast。
+
+2. ServerLogger.java（server 包）
+日志工具，logRun / logChat，先保证能往 logs/ 写文件。
+
+3. ChatServer.java（server 包）
+只写 ServerSocket 绑定 8888 + accept() 循环，先把"能接连接"跑通，还不处理消息。
+
+4. ClientHandler.java（server 包）
+先写昵称注册协议：收 NICK:xxx → 校验 → 回 OK / ERROR_NICK；调通注册后，再加消息广播循环、finally 里的下线清理。
+
+5. ChatClient.java（client 包）
+先写连接 + 注册流程，能成功进聊天室再说。
+
+6. ReceiveMsgThread.java（client 包）
+最后加接收子线程，解决"输入时收不到消息"的问题；再补 /quit、空消息拦截。
