@@ -52,6 +52,19 @@ public class ChatClient {
                     System.out.println(" 昵称不能为空！");
                     continue;
                 }
+
+                String[]banWords={"【","】","系","统"};
+                boolean invalid=false;
+                for (String ban:banWords){
+                    if(nick.contains(ban)){
+                        invalid=true;
+                    }
+                    break;
+                }
+                if(invalid){
+                    System.out.println("存在违规字符：\"【\",\"】\",\"系\",\"统\"");
+                    continue;
+                }
                 pw.println("NICK:"+nick);
                 String resp=br.readLine();
                 if(resp==null){
