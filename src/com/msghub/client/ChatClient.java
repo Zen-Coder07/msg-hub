@@ -26,7 +26,16 @@ public class ChatClient {
         System.out.print("请输入端口：(默认8888)");
         String inputPort=sc.nextLine().trim();
         if(!inputPort.isBlank()){
-            port= Integer.parseInt(inputPort);
+            try{
+                port=Integer.parseInt(inputPort);
+                if(port<1||port>65535){
+                    System.out.println("端口范围应为 1-65535，已使用默认端口 "+8888);
+                    port=8888;
+                }
+            }catch (NumberFormatException e){
+                System.out.println("端口格式不正确，已使用默认端口 "+8888);
+                port=8888;
+            }
         }
         try{
             socket=new Socket(ip,port);
@@ -34,7 +43,8 @@ public class ChatClient {
             br=new BufferedReader(new InputStreamReader(socket.getInputStream()));
             System.out.println("＜（＾－＾）＞ 连接服务器成功！");
 
-
+            //昵称注册环节：注册成功才跳出循环
+            boolean registered=false;
             while(true){
                 System.out.print("请输入您的昵称：");
                 String nick=sc.nextLine().trim();
@@ -44,36 +54,60 @@ public class ChatClient {
                 }
                 pw.println("NICK:"+nick);
                 String resp=br.readLine();
+                if(resp==null){
+                    System.out.println("× 与服务端的连接已断开");
+                    break;
+                }
                 if("OK".equals(resp)){
                     System.out.println("恭喜！注册成功！");
+                    registered=true;
+                    break;
                 }
                 else if("ERROR_NICK".equals(resp)){
                     System.out.println("昵称重复，换一个吧");
                 }
             }
-            //启动子线程
-            receiver=new ReceiveMsgThread(br);
-            new Thread(receiver).start();
 
-            while (true){
-                String sendText=sc.nextLine().trim();
-                if(sendText.isBlank()){
-                    System.out.println("不能发送空消息！");
-                    continue;
+            if(registered){
+                //启动子线程
+                receiver=new ReceiveMsgThread(br);
+                new Thread(receiver).start();
+
+                while (true){
+                    String sendText=sc.nextLine().trim();
+                    if(sendText.isBlank()){
+                        System.out.println("不能发送空消息！");
+                        continue;
+                    }
+                    if("/quit".equals(sendText)){
+                        receiver.stop();
+                        System.out.println("ヾ(•ω•`)o 你已退出聊天室");
+                        break;
+                    }
+                    pw.println(sendText);
                 }
-                if("/quit".equals(sendText)){
-                    receiver.stop();
-                    pw.close();
-                    socket.close();
-                    System.out.println("ヾ(•ω•`)o 你已退出聊天室");
-                    break;
-                }
-                pw.println(sendText);
             }
         }catch (IOException e){
             System.out.println("× 连接失败："+e.getMessage());
         }finally {
+            closeQuietly();
             sc.close();
+        }
+    }
+
+    //关闭网络资源：关闭Socket会同时中断接收线程阻塞中的readLine
+    private static void closeQuietly(){
+        try{
+            if(pw!=null){
+                pw.close();
+            }
+        }catch (Exception ignored){
+        }
+        try{
+            if(socket!=null&&!socket.isClosed()){
+                socket.close();
+            }
+        }catch (IOException ignored){
         }
     }
 }

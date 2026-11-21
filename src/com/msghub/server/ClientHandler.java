@@ -66,6 +66,13 @@ public class ClientHandler implements Runnable{
         }
     }
     private void cleanUp(){
+        //先移出在线列表再广播，保证下线用户不会收到自己的退出消息
+        if(nickName!=null){
+            userManager.removeUser(nickName);
+            String leave="【系统】"+nickName+" 已退出聊天室。";
+            userManager.broadcast(leave,null);
+            ServerLogger.logRun(leave);
+        }
         try {
             if (br != null) {
                 br.close();
@@ -73,12 +80,13 @@ public class ClientHandler implements Runnable{
             if (pw!=null) {
                 pw.close();
             }
-            if(socket!=null){
+            if(socket!=null&&!socket.isClosed()){
                 socket.close();
             }
         }catch (IOException ignored){
 
+        }finally {
+            ServerLogger.logRun("用户["+nickName+"]连接资源释放成功");
         }
-        ServerLogger.logRun("连接资源释放成功");
     }
 }
