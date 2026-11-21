@@ -1286,3 +1286,6 @@ public final class ServerLogger {
 | 日志并发安全 | `src/com/msghub/server/ServerLogger.java` | `WRITE_LOCK`、`logToFile()` |
 | 客户端连接与输入 | `src/com/msghub/client/ChatClient.java` | `main()`、发送循环 |
 | 客户端接收线程 | `src/com/msghub/client/ReceiveMsgThread.java` | `run()`、`volatile running` |
+
+
+# * 该README.md文档部分为AI总结，目的是后续复习
