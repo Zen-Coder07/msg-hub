@@ -58,8 +58,9 @@ public class ChatClient {
                 for (String ban:banWords){
                     if(nick.contains(ban)){
                         invalid=true;
+                        break;
                     }
-                    break;
+
                 }
                 if(invalid){
                     System.out.println("存在违规字符：\"【\",\"】\",\"系\",\"统\"");
